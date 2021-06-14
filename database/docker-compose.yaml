@@ -1,0 +1,142 @@
+version: "3.3"
+
+services:
+  #######################
+  #####   db_mysql  #####
+  #######################
+  mysql:
+    container_name: "db-mysql-fbposts"
+    image: mysql
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+    volumes:
+      - my-db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: secret
+    command: --default-authentication-plugin=mysql_native_password
+    networks:
+      - FBNetwork
+
+  mysql-testes:
+    container_name: "db-tests"
+    image: mysql
+    ports:
+      - "3308:3306"
+    expose:
+      - 3308
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: sa
+      MYSQL_PASSWORD: secret
+      MYSQL_DATABASE: desafio2-testes
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
+    networks:
+      - FBNetwork
+
+  admin:
+    image: phpmyadmin
+    container_name: "db_admin-fbposts"
+    restart: always
+    ports:
+      - 8088:80
+    expose:
+      - 8080
+    environment:
+      PMA_HOST: db-mysql-fbposts
+      PMA_USER: root
+      PMA_PASSWORD: secret
+    networks:
+      - FBNetwork
+
+  ##########################
+  ########  redis  #########
+  ##########################
+  redis:
+    container_name: "redis"
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - FBNetwork
+
+  liquibase:
+    container_name: liquibase
+    image: liquibase/liquibase
+    volumes:
+      - ./liquibase/changelog/:/liquibase/changelog/
+      - ./liquibase/liquibase.docker.properties:/liquibase/liquibase.docker.properties
+    networks:
+      - FBNetwork
+    command: bash -c 'liquibase --defaultsFile=/liquibase/liquibase.docker.properties update'
+
+  mongo:
+    container_name: mongo
+    image: mongo:4.2
+    restart: always
+    ports:
+      - 27017:27017
+    expose:
+      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: desafio2
+    volumes:
+      - my-mongo:/data/db
+      - ./settings/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    networks:
+      - FBNetwork
+
+  mongotestes:
+    image: mongo:4.2
+    container_name: mongoTestes
+    restart: always
+    ports:
+      - 27018:27017
+    expose:
+      - 27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: desafio2-testes
+    volumes:
+      # - my-mongo:/data/db
+      - ./settings/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+    networks:
+      - FBNetwork
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: secret
+    networks:
+      - FBNetwork
+
+  liquibase_mongo:
+    container_name: liquibase_mongo
+    image: liquibase/liquibase
+    volumes:
+      - ./liquibase/mongo/changelog.xml:/liquibase/changelog.xml
+      - ./liquibase/mongo/liquibase.docker.properties:/liquibase/liquibase.docker.properties
+      - ./liquibase/drivers/driver_mongodb_3.12.8.jar:/liquibase/lib/mongodb_3.12.8.jar
+      - ./liquibase/drivers/driver_mongodb_ext_4.3.2.jar:/liquibase/lib/mongodb_ext_4.3.2.jar
+    networks:
+      - FBNetwork
+    command: bash -c 'liquibase --defaultsFile=/liquibase/liquibase.docker.properties update'
+
+volumes:
+  my-db:
+  my-mongo:
+
+networks:
+  FBNetwork:
+    name: FBNetwork
+    driver: bridge

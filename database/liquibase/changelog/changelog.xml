@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+  <preConditions>
+    <runningAs username="root"/>
+    <dbms type="mysql" />
+  </preConditions>
+
+  <changeSet author="root" id="1">
+    <createTable tableName="Users">
+      <column autoIncrement="true" name ="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="user_pkey"/>
+      </column>
+      <column name="username" type="VARCHAR(50)"/>
+      <column name="password" type="text"/>
+      <column name="FbAccessToken" type="text"/>
+      <column name="FbUserID" type="text"/>
+    </createTable>
+
+    <createTable tableName="Pages">
+      <column autoIncrement="true" name ="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="pages_pkey"/>
+      </column>
+      <column name="FbID" type="text"/>
+      <column name="name" type="VARCHAR(50)"/>
+      <column name="FbAccessToken" type="text"/>
+      <column name="userID" type="INTEGER"/>
+    </createTable>
+
+    <createTable tableName="Posts">
+      <column autoIncrement="true" name ="id" type="INTEGER">
+        <constraints nullable="false" primaryKey="true" primaryKeyName="posts_ukey"/>
+      </column>
+      <column name="PageID" type="INTEGER"/>
+      <column name="PageAccessToken" type="text"/>
+      <column name="send_time" type="integer"/>
+      <column name="message" type="TEXT"/>
+      <column name="userID" type="INTEGER"/>
+    </createTable>
+
+    <addForeignKeyConstraint baseColumnNames="userID" baseTableName="Pages" constraintName="user_pkey" referencedColumnNames="id" referencedTableName="Users"/>
+    <addForeignKeyConstraint baseColumnNames="PageID" baseTableName="Posts" constraintName="posts_pkey" referencedColumnNames="id" referencedTableName="Pages"/>
+    <addForeignKeyConstraint baseColumnNames="userID" baseTableName="Posts" constraintName="posts_ukey" referencedColumnNames="id" referencedTableName="Users"/>
+
+  </changeSet>
+
+  <changeSet id="2" author="root">
+    <addColumn tableName="Posts">
+      <column name="sendStatus" type="integer" remarks="0 - ERROR, 1 - SCHEDULED, 2 - PROCESSING, 3 - SENT"/>
+    </addColumn>
+
+    <addColumn tableName="Posts">
+      <column name="fbPostID" type="text">
+        <constraints nullable='true'/>
+      </column>
+    </addColumn>
+  </changeSet>
+
+  <changeSet author="root" id="3">
+    <addDefaultValue columnName="sendStatus" defaultValue="3" tableName="Posts"/>
+  </changeSet>
+
+  <changeSet author="root" id="4">
+    <addDefaultValue columnName="sendStatus" defaultValue="1" tableName="Posts"/>
+  </changeSet>
+
+  <changeSet author="root" id="5">
+    <dropTable tableName="Posts"/>
+  </changeSet>
+</databaseChangeLog>
+
+

@@ -1,0 +1,359 @@
+openapi: 3.0.0
+
+info:
+  version: 1.0.0
+  title: "Post schedule"
+
+servers:
+  - url: http://localhost
+
+paths:
+  /working:
+    get:
+      summary:  'Check if connection in correct.'
+      tags:
+        - 'Connection'
+      responses:
+        '200':
+          description: 'Server on'
+          
+  /authenticate/login:
+    post:
+      summary: 'Login into the application.'
+      tags:
+        - 'Authentication'
+      requestBody:
+        description: 'User login'
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login&Register'
+      responses:
+        '200':
+          description: 'Success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: 'User not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '401':
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Unauthorized'
+          
+  /authenticate/register:
+    post:
+      summary: 'Register into the application.'
+      tags:
+        - 'Authentication'
+      requestBody:
+        description: 'User register'
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login&Register'
+      responses:
+        '201':
+          description: 'User created successfully'
+        '422':
+          description: 'User already exists!'
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAlreadyExists'
+          
+  /private/{id}:
+    put:
+      tags: 
+        - 'User'
+      summary: 'Update user information'
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: 'id'
+          in: 'path'
+          schema: 
+            type: 'integer'
+          required: true
+          description: 'Id of the user that want to update his info.'
+      requestBody:
+        description: 'New info about user'
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserInfo'
+      responses:
+        '200':
+          description: 'User updated sucessfully!'
+        '400':
+          description: 'User not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+      
+    delete:
+      tags: 
+        - 'User'
+      summary: 'Delete user'
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: 'id'
+          in: 'path'
+          schema: 
+            type: 'integer'
+          required: true
+          description: 'Id of the user that will be removed'
+      responses:
+        '204':
+          description: 'The resource was deleted successfully.'
+          
+  /user-pages:
+    get:
+      summary: 'Get facebook pages that user have access'
+      tags:
+        - 'Pages'
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: 'Pages Inserted successfully'
+        '400':
+          description: 'User not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotFound'
+        '422':
+          description: 'Pages already inserted!'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagesAlreadyInserted'
+  
+  /posts:
+    post:
+      summary: 'Schedulle a post'
+      tags:
+        - 'Posts'
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: 'Post data'
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post' 
+      responses:
+        '201':
+          description: 'Post created sucessfully!'
+        '400':
+          description: 'Bad Request!'
+          content: 
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/InvalidHour'
+                  - $ref: '#/components/schemas/PageNotFound'
+        '405':
+          description: 'Not allowed!'
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotAllowed'
+        
+  /posts/{id}:
+    put:
+      summary: 'Update post data'
+      tags:
+        - 'Posts'
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: 'id'
+          in: 'path'
+          schema: 
+            type: 'integer'
+          required: true
+          description: 'Id of the post that will be updated'
+      requestBody:
+        description: 'New post data'
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePost'
+      responses:
+        '200':
+          description: 'Post updated sucessfully!'
+        '400':
+          description: 'Post not found!'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostNotFound' 
+
+    delete:
+      summary: 'Delete post'
+      tags:
+        - 'Posts'
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: 'id'
+          in: 'path'
+          schema: 
+            type: 'integer'
+          required: true
+          description: 'Id of the post that will be removed'
+      responses:
+        '204':
+          description: 'The resource was deleted successfully.'
+
+  /fb:
+    get:
+      summary: 'Get facebook link to give permissions'
+      tags:
+        - 'Facebook Api'
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 'Link to redirect user to facebook'
+
+
+components:
+  schemas:  
+    PostNotFound:
+      type: object
+      properties: 
+        message:
+          type: 'string'
+          description: 'Post not found!'
+  
+    NotAllowed:
+      type: object
+      properties: 
+        message:
+          type: 'string'
+          description: 'Not allowed!'
+  
+    PagesAlreadyInserted:
+      type: object
+      properties: 
+        message:
+          type: 'string'
+          description: 'Pages already inserted!'
+          
+    Unauthorized:
+      type: object
+      properties: 
+        message:
+          type: 'string'
+          description: 'Unauthorized!'
+          
+    UserNotFound:
+      type: object
+      properties: 
+        message:
+          type: 'string'
+          description: 'User not found!'
+  
+    UserAlreadyExists:
+      type: object
+      properties:
+        message:
+          type: 'string'
+          description: 'User already exists!'
+  
+    InvalidHour:
+      type: object
+      properties: 
+        message:
+          type: 'string'
+          description: 'Invalid hour!'
+    
+    PageNotFound:
+      type: object
+      properties: 
+        message:
+          type: 'string'
+          description: 'Page not found!'
+    
+    UpdatePost:
+      type: object
+      properties:
+        message:
+          type: 'string'
+          description: 'Content of post'
+          example: 'Hello, my name is John and i am from USA'
+        sendTime:
+          type: 'integer'
+          description: 'Time that post should be sent in unix form'
+          example: '946684800'
+          
+    Post:
+      type: object
+      properties:
+        internalPageId:
+          type: 'integer'
+          description: 'Id of the page that want to schedulle a post'
+          example: '1'
+        message:
+          type: 'string'
+          description: 'Content of post'
+          example: 'Hello, my name is John and i am from USA'
+        sendTime:
+          type: 'integer'
+          description: 'Time that post should be sent in unix form'
+          example: '946684800'
+        
+    UpdateUserInfo:
+      type: object
+      properties:
+        password:
+          type: string
+          description: 'New password'
+          example: 'password'
+          
+    Login&Register:
+      type: object
+      properties:
+        username:
+          type: string
+          description: 'Username to login'
+          example: 'username'
+        password:
+          type: string
+          description: 'User password'
+          example: 'password'
+          
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+          description: 'The token to access the app'
+        token_type:
+          type: string
+          description: 'The type of the created token'
+        expires_in:
+          type: string
+          description: 'The time, in seconds, that token will expire'
+          
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

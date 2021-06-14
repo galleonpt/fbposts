@@ -1,0 +1,17 @@
+version: "3.3"
+
+services:
+  php:
+    container_name: "jobs"
+    build: "./"
+    volumes:
+      - ./:/var/www/html
+      - ./config/crontab:/etc/cron.d/crontab
+      - ./supervisor/configs:/etc/supervisor/conf.d
+    networks:
+      - FBNetwork
+
+networks:
+  FBNetwork:
+    name: FBNetwork
+    driver: bridge

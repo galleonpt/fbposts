@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd
+      http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<changeSet id="1" author="root">
+		<ext:createCollection collectionName="post">
+			<ext:options>
+				{
+					validator: {
+						$jsonSchema: {
+							bsonType: "object",
+							required: ["message", "PageID", "PageAccessToken", "send_time", "userID", "sendStatus"],
+							properties: {
+								message: {
+									bsonType: "string",
+									description: "Post content"
+								},
+								PageID: {
+									bsonType: "int",
+									description: "Page id"
+								},
+								PageAccessToken: {
+									bsonType: "string",
+									description: "FB access token"
+								},
+								send_time: {
+									bsonType: "int",
+									description: "Time in unix"
+								},
+								userID: {
+									bsonType: "int",
+									description: "User id that is creating a post"
+								},
+								sendStatus: {
+									bsonType: "int",
+									description: "Send, Error,..."
+								},
+								fbPostID:{
+									bsonType: "string",
+									description: "Facebook id returned when post is sent"
+								}
+							}
+						}
+					},
+					validationLevel: "strict"
+				}
+			</ext:options>
+		</ext:createCollection>
+	</changeSet>
+
+	<changeSet id="2" author="root">
+		<ext:createIndex collectionName="post">
+			<ext:keys>
+					{ sendStatus: 1, send_time:1, userID:1}
+			</ext:keys>
+			<ext:options>
+				{name: "postIndex"}
+			</ext:options>
+		</ext:createIndex>
+	</changeSet>
+
+	<changeSet id="3" author="root">
+		<ext:runCommand>
+			<ext:command>
+			{
+				'collMod': 'post',
+				'validator': {
+						$jsonSchema: {
+							bsonType: "object",
+							required: ["message", "PageID", "PageAccessToken", "send_time", "userID", "sendStatus"],
+							properties: {
+								message: {
+									bsonType: "string",
+									description: "Post content"
+								},
+								PageID: {
+									bsonType: "int",
+									description: "Page id"
+								},
+								PageAccessToken: {
+									bsonType: "string",
+									description: "FB access token"
+								},
+								send_time: {
+									bsonType: "int",
+									description: "Time in unix"
+								},
+								userID: {
+									bsonType: "int",
+									description: "User id that is creating a post"
+								},
+								sendStatus: {
+									bsonType: "int",
+									description: "Send, Error,..."
+								},
+								fbPostID:{
+									bsonType: "string",
+									description: "Facebook id returned when post is sent"
+								},
+								startProcessing:{
+									bsonType: "int",
+									description: "Unix time when post have been processed to Facebook"
+								}
+							}
+						}
+					},
+					validationLevel: "strict"
+			}
+			</ext:command>
+		</ext:runCommand>
+	</changeSet>
+
+</databaseChangeLog>
+

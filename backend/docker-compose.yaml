@@ -1,0 +1,36 @@
+version: "3.3"
+
+services:
+  php:
+    container_name: "phpfbposts"
+    build: .
+    # build: D:\programacao\php\asd\backend 
+    ports:
+      - "80:80"
+    environment:
+      - ELASTIC_APM_SERVER_URL=https://i-o-optimized-deployment-3702e6.apm.westeurope.azure.elastic-cloud.com
+      - ELASTIC_APM_SECRET_TOKEN=VkgNbbpjkla6q4F0fC
+      - ELASTIC_APM_SERVICE_NAME="My service"
+    volumes:
+      - ./:/var/www/html
+      - ./config/httpd.conf:/etc/apache2/httpd.conf
+      - ./config/apache2.conf:/etc/apache2/apache2.conf
+      - ./config/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    networks:
+      - FBNetwork
+
+  locust:
+    image: locustio/locust
+    container_name: locust
+    ports:
+      - "8089:8089"
+    volumes:
+      - ./Locust/:/mnt/locust/
+    command: -f /mnt/locust/locustfile.py -H http://locusttestes/
+    networks:
+      - FBNetwork
+
+networks:
+  FBNetwork:
+    name: FBNetwork
+    driver: bridge

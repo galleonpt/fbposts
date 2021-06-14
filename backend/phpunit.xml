@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="./vendor/phpunit/phpunit/phpunit.xsd" bootstrap="vendor/autoload.php" colors="true" verbose="true" stopOnFailure="true">
+
+    <php>
+        <!-- <env name="APP_ENV" value="testing"/> -->
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_DATABASE" value="desafio2-testes"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_HOST" value="db-tests"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value="secret"/>
+
+        <env name="MONGO_DB_HOST" value="mongotestes"/>
+        <env name="MONGO_DB_DATABASE" value="desafio2-testes"/>
+        <env name="MONGO_DB_USERNAME" value="root"/>
+        <env name="MONGO_DB_PASSWORD" value="secret"/>
+
+    </php>
+    <testsuites>
+        <testsuite name="Integration">
+            <!-- <directory suffix="Test.php">./tests/integration</directory> -->
+            <file>./tests/integration/AuthTest.php</file>
+            <file>./tests/integration/UserTest.php</file>
+            <file>./tests/integration/PostsTest.php</file>
+        </testsuite>
+        <!-- <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/unit</directory>
+        </testsuite> -->
+    </testsuites>
+</phpunit>

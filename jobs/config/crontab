@@ -1,0 +1,2 @@
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
+* * * * * cd /var/www/html && php artisan schedule:run >> log.txt
